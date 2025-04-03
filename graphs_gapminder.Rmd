@@ -1,0 +1,78 @@
+---
+title: "tarea2_aguilar"
+author: "MariaAguilar"
+date: "2025-03-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(gapminder)
+library(dplyr)
+data<-gapminder 
+colnames(data)
+levels(data$continent)
+
+latam_df <- data[data$continent == "Americas",]
+unique(latam_df$country)
+
+
+latam_countries <- c("Argentina", "Chile", "Peru", "Colombia", "Bolivia", "Ecuador", "Brazil", "Mexico", "Uruguay")
+latam_df <- data[data$country %in% latam_countries, ]
+
+table(latam_df$year)
+
+```
+
+
+## Graph
+
+```{r cars}
+
+library(ggplot2)
+library(ggthemes)
+
+ggplot(latam_df, aes(x = year, y = lifeExp, color = country, group = country)) +
+  geom_line(linewidth = 1) + 
+  geom_point(size = 2) + 
+  labs(title = "Evolución de la esperanza de vida en América Latina",
+       x = "Año",
+       y = "Esperanza de Vida",
+       color = "País") +
+  theme_minimal()
+
+```
+
+## 
+
+
+
+```{r, echo=FALSE}
+
+# Crear el gráfico con personalización para cada país
+ggplot(latam_df, aes(x = year, y = lifeExp, group = country)) +
+  geom_line(aes(linetype = country, color = country), size = 1) + 
+  geom_point(aes(shape = country, color = country), size = 2) + 
+  labs(title = "Evolución de la Esperanza de Vida en los países Andinos",
+       x = "Año",
+       y = "Esperanza de Vida",
+       color = "País",
+       linetype = "País",
+       shape = "País") +
+  scale_color_manual(values = c("Peru" = "red", "Bolivia" = "blue", "Ecuador" = "green", 
+                                "Colombia" = "grey", "Argentina" = "grey", "Chile" = "grey", 
+                                "Mexico" = "grey", "Uruguay" = "grey")) +
+  scale_linetype_manual(values = c("Peru" = "solid", "Bolivia" = "solid", "Ecuador" = "solid",
+                                   "Colombia" = "solid", "Argentina" = "dashed", "Chile" = "dashed",
+                                   "Mexico" = "dashed")) +
+  scale_shape_manual(values = c("Peru" = 16, "Bolivia" = 17, "Ecuador" = 18, "Colombia" = 15,
+                                "Argentina" = 3, "Chile" = 4, "Mexico" = 8, "Otros" = 1)) +
+  theme_minimal() +
+  theme(
+    legend.text = element_text(size = 6), 
+    legend.title = element_text(size = 8) )
+
+```
+
+# Interpretacion
+En general, la tendencia de los 9 países latinoamericanos seleccionados ha sido a incrementar la esperanza de vida, y han tendido a converger en valores cercanos a los 70 u 80 años de vida. Los años en que se dio el mayor avance en América latina suelen encontrarse entre la década de los 70s y 80s, pues es el periodo en  que se observan las mayores pendientes del gráfico. 
+Los países Andinos (Ecuador, Bolivia y Perú) presentaban los valores más bajos de esperanza de vida al inicio de periodo, pero también experimentaron los desarrollos más significativos en comparación a otros países de la región.

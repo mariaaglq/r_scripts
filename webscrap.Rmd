@@ -1,0 +1,241 @@
+---
+title: "tarea2_Curso_Webscrapping"
+author: "MariaAguilar"
+date: "2025-03-20"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+library(rvest)
+library(httr)
+library(writexl)
+```
+
+## Parte 1
+# tabla 1
+
+```{r cars}
+url <- "https://es.wikipedia.org/wiki/Instituto_de_Gobernanza_de_los_Recursos_Naturales#%C3%8Dndice_de_gobernanza_de_recursos"
+pagina <- read_html(url)
+```
+
+```{r}
+tabla1_igrrnn <- pagina %>%
+  html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>%
+  html_table(fill = TRUE) %>%
+  .[[1]]  # Extraemos la primera tabla encontrada
+```
+
+```{r}
+tabla1_igrrnn
+```
+
+
+```{r}
+# Exportar tabla a archivo excel
+write_xlsx(tabla1_igrrnn, "tarea2/tabla1_igrrnn.xlsx")
+print("Archivo 'tabla1.xlsx' guardado con éxito!")
+```
+
+## tabla2
+
+```{r}
+url <- "https://datosmacro.expansion.com/estado/indice-percepcion-corrupcion"
+pagina <- read_html(url)
+```
+
+```{r}
+tabla2_corrupcion <- pagina %>%
+  html_nodes(xpath = '//*[@id="tb1"]') %>%
+  html_table(fill = TRUE) %>%
+  .[[1]]  # Extraemos la primera tabla encontrada
+```
+
+```{r}
+tabla2_corrupcion
+```
+
+```{r}
+# Exportar tabla a archivo excel
+write_xlsx(tabla2_corrupcion, "tarea2/tabla2_corrupcion.xlsx")
+print("Archivo 'tabla2.xlsx' guardado con éxito!")
+```
+
+## tabla3
+
+```{r}
+url <- "https://es.wikipedia.org/wiki/Anexo:Pa%C3%ADses_por_porcentaje_de_poblaci%C3%B3n_debajo_de_la_l%C3%ADnea_de_pobreza"
+pagina <- read_html(url)
+```
+
+```{r}
+tabla3_pobreza <- pagina %>%
+  html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[1]') %>%
+  html_table(fill = TRUE) %>%
+  .[[1]]  # Extraemos la primera tabla encontrada
+```
+
+```{r}
+tabla3_pobreza
+```
+
+
+```{r}
+# Exportar tabla a archivo excel
+write_xlsx(tabla2_corrupcion, "tarea2/tabla3_pobreza.xlsx")
+print("Archivo 'tabla3.xlsx' guardado con éxito!")
+```
+
+
+## tabla 4
+
+```{r}
+url <- "https://es.wikipedia.org/wiki/Anexo:Lenguas_nativas_del_Per%C3%BA"
+pagina <- read_html(url)
+```
+
+```{r}
+tabla4_lenat <- pagina %>%
+  html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table') %>%
+  html_table(fill = TRUE) %>%
+  .[[1]]  # Extraemos la primera tabla encontrada
+```
+
+```{r}
+tabla4_lenat
+```
+
+```{r}
+# Exportar tabla a archivo excel
+write_xlsx(tabla4_lenat, "tarea2/tabla4_lenat.xlsx")
+print("Archivo 'tabla4.xlsx' guardado con éxito!")
+```
+
+## tabla 5
+
+```{r}
+url <- "https://es.wikipedia.org/wiki/Anexo:Guerras_y_conflictos_actuales"
+pagina <- read_html(url)
+```
+
+```{r}
+tabla5_guerras2025 <- pagina %>%
+  html_nodes(xpath = '//*[@id="mw-content-text"]/div[1]/table[2]') %>%
+  html_table(fill = TRUE) %>%
+  .[[1]]  # Extraemos la primera tabla encontrada
+```
+
+```{r}
+tabla5_guerras2025
+```
+
+```{r}
+# Exportar tabla a archivo excel
+write_xlsx(tabla5_guerras2025, "tarea2/tabla5_guerras2025.xlsx")
+print("Archivo 'tabla5.xlsx' guardado con éxito!")
+```
+
+
+##---- Parte 2
+
+```{r}
+
+library(rvest)
+library(writexl)
+
+# Definir la URL de la página target
+url <- "https://www.gob.pe/institucion/mef/funcionarios"
+
+# Leer la página con rvest
+pagina_web <- read_html(url, encoding= "UTF-8")
+
+```
+
+Extraer Nombres de funcionarios
+
+```{r}
+# Selector CSS para los nombres de los funcionarios
+css_nombre <- "h3.text-2xl"
+
+# Extraer los nombres
+nombre_html <- html_nodes(pagina_web, css_nombre)
+nombre_texto <- html_text(nombre_html)
+
+# Ver los resultados
+print(nombre_texto)
+```
+
+Extraer cargos de funcionarios:
+
+```{r}
+
+# Selector CSS para los cargos
+css_cargo <- "p"
+
+# Extraer los cargos
+cargo_html <- html_nodes(pagina_web, css_cargo)
+cargo_texto <- html_text(cargo_html)
+
+# Ver los primeros resultados
+print(cargo_texto)
+```
+
+Extraer Numeros de telefono, tomando en cuenta que el primer y 7mo funcionario no lo muestran:
+
+```{r}
+# Selector CSS para los enlaces telefónicos (href con "tel:")
+css_telefono <- "a[href^='tel:']"
+
+# Extraer los nodos que contienen los números
+telefono_html <- html_nodes(pagina_web, css_telefono)
+
+# Obtener los números telefónicos del texto (o puedes extraerlos del href si prefieres)
+telefono_texto <- html_text(telefono_html)
+
+# Insertar NA en el elemento 7 porque no presenta teléfono
+telefono_texto <- append(telefono_texto, NA, after = 6)
+
+# Insertar NA en el elemento 1 porque no presenta teléfono. Se busca obtener len 20 que es el numero de funcionarios
+telefono_texto <- append(telefono_texto, NA, after = 0) 
+
+# Ver los resultados
+print(telefono_texto)
+```
+
+
+Extraer Correos, tomando en cuenta que el primer funcionario no muestra el suyo:
+
+```{r}
+# Selector CSS para los enlaces de correo electrónico (href con "mailto:")
+css_correo <- "a[href^='mailto:']"
+
+# Extraer los nodos que contienen los correos
+correo_html <- html_nodes(pagina_web, css_correo)
+
+# Obtener los correos electrónicos del texto (o puedes extraerlos del href si prefieres)
+correo_texto <- html_text(correo_html)
+
+# Insertar NA en el elemento 1 pues no muestra su correo. busco obtener len 20 que es el numero de funcionarios.
+correo_texto <- append(correo_texto, NA, after = 0)
+
+# Ver los resultados
+print(correo_texto)
+
+```
+
+Armamos la base de datos:
+
+```{r}
+# Crear un dataframe asegurando que haya el mismo número de nombres, cargos, telefonos y correos
+df_funcionarios <- data.frame(NOMBRE = nombre_texto, CARGO = cargo_texto, TELF= telefono_texto, CORREO=correo_texto)
+
+# Mostrar los primeros datos del dataframe
+head(df_funcionarios)
+
+```
+
+```{r}
+# Exportar el dataframe a un archivo excel
+write_xlsx(df_funcionarios, "tarea2/funcionarios.xlsx")
+print("Archivo 'funcionarios.xlsx' guardado con éxito!")
+```

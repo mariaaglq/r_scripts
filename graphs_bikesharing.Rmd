@@ -1,0 +1,116 @@
+---
+title: "TF_Curso Intro a R"
+author: "MariaAguilar"
+date: "2025-03-18"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+#---- Seleccion y transformacion de variables
+
+
+```{r }
+#abriendo la bd
+library(car)
+library(tidyverse)
+library(dbplyr)
+library(conflicted)
+
+conflict_prefer("filter", "dplyr")
+conflict_prefer("lag", "dplyr")
+
+setwd("C:/Users/maria/Documents/qlab/rstudioq")
+data <- read.csv("bikesharing.csv.csv")
+
+str(data)
+head(data)
+```
+
+```{r}
+# variable principal : weekday
+unique(data$weekday)
+
+#variable: nombre del dia
+data$weekday1 <- factor(data$weekday, 
+                        levels = c("1","2","3","4","5","6","0"), 
+                        labels = c("lunes", "martes","miercoles","jueves", 
+                                   "viernes","sabado","domingo"))
+head(data)
+
+#variable: dia de semana o fin de semana
+data$daytype <- car::recode(as.character(data$weekday), "1:5=1; 0=2; 6=2")
+data$daytype <- factor(data$daytype, levels = c("1", "2"), labels = c("Weekday", "Weekend"))
+summary(data$daytype)
+
+
+```
+
+```{r}
+# segunda variable: season
+unique(data$season)
+
+data$season1 <- factor(data$season, 
+                        levels = c("1","2","3","4"), 
+                        labels = c("invierno", "primavera","verano","otoño"))
+
+summary(data$season1)
+```
+
+#---- Visualizacion de datos
+
+# Grafico 1
+Representa  el  promedio  de  usuarios  (cnt)  en  función  de  la  variable principal utilizando un gráfico de barras.
+
+```{r}
+# Gráfico  1:  
+library(ggplot2)
+
+# Calcular promedio de usuarios por dia de la semana
+usersbywday <- data %>% 
+  group_by(weekday1) %>% 
+  summarise(users_mean = mean(cnt))
+
+ggplot(usersbywday, aes(x = weekday1, y = users_mean, fill = weekday1)) +
+  geom_bar(stat = "identity", show.legend = FALSE) + #no mostrar leyenda de colores de los  dias
+  labs(x = "Día de la semana", y = "Promedio de N° Usuarios", title = "Promedio de Usuarios diarios, según día de la semana") +
+  theme_minimal()
+
+```
+
+# Grafico 2:
+Representa  el  promedio  de  usuarios  (cnt)  en  función  de  la  variable principal, pero diferenciando por la segunda variable con colores o barras agrupadas.
+
+```{r}
+# Gráfico  2:  
+
+# Calcular promedio de usuarios por dia de la semana
+usersbywdayseas <- data %>% 
+  group_by(weekday1,season1) %>% 
+  summarise(avg_users = mean(cnt))
+
+ggplot(usersbywdayseas, aes(x = weekday1, y = avg_users, fill = weekday1)) +
+  geom_bar(stat = "identity", show.legend = FALSE) +  # No mostrar leyenda de dias y colores
+  facet_wrap(~ season1, ncol = 2) +  # Un grafico por cada estacion,en 2 columnas
+  labs(x = "Día de la semana", 
+       y = "Promedio de usuarios", 
+       title = "Promedio de usuarios por día y estación") +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) #orientacion de labels de x axis
+
+```
+```{r}
+# Grafico extra
+# alquileres por dia by temperature in box plot, mostrando mediana, max y min (no promedio)
+
+ggplot(data, aes(x = weekday1, y = cnt, fill = season1)) +
+  geom_boxplot() +
+  geom_jitter(shape = 1, width = 0.2, alpha = 0.5, color = "black") +  # Agregar puntos para valores atípicos
+  labs(x = "Día de la semana", y = "N° Usuarios", title = "Boxplot de usuarios por día, según estación del año") +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1)) +
+  theme_minimal() +
+  scale_fill_discrete(name = "Estación")
+```
+
